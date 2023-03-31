@@ -17,6 +17,7 @@ func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 		return pathTemplate
 	}
 	queryParams, _ := form.EncodeValues(msg)
+	pathQueryParams, _ := form.EncodePathValues(msg)
 	pathParams := make(map[string]struct{})
 	path := reg.ReplaceAllStringFunc(pathTemplate, func(in string) string {
 		// it's unreachable because the reg means that must have more than one char in {}
@@ -25,6 +26,9 @@ func EncodeURL(pathTemplate string, msg interface{}, needQuery bool) string {
 		//}
 		key := in[1 : len(in)-1]
 		value := queryParams.Get(key)
+		if len(value) == 0 {
+			value = pathQueryParams.Get(key)
+		}
 		pathParams[key] = struct{}{}
 		return value
 	})
